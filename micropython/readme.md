@@ -4,4 +4,6 @@ To use this code you need:
 - a LoPy board, expansion board, CoZIR-AH sensor, attached LoRa antenna (make sure: no antenna = fried LoRa chip)
 - the pymakr plugin (for Atom or other editor)
 
-The hardware setup is in ../hardware
+Update the LoPy firmware before you start (consult pycom.io for the latest updater program)
+
+The hardware setup to connect the CO2 sensor is in ../hardware
