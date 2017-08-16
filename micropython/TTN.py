@@ -15,6 +15,7 @@ import LEDColors
 class LoRaConnection:
     # Initialize LoRa in LORAWAN mode.
     lora = LoRa(mode=LoRa.LORAWAN)
+    led = LEDColors.pyLED()
 
     def start(self):
         # create an OTAA authentication parameters, do NOT change these
@@ -23,19 +24,19 @@ class LoRaConnection:
 
         # join a network using OTAA (Over the Air Activation)
         self.lora.join(activation=LoRa.OTAA, auth=(app_eui, app_key), timeout=0)
-        pycom.rgbled(LEDColors.color['pink'])
+        self.led.setLED('pink')
         # wait until the module has joined the network
         while not self.lora.has_joined():
-            pycom.rgbled(LEDColors.color['purple'])
+            self.led.setLED('purple')
             time.sleep(0.5)
-            pycom.rgbled(LEDColors.color['off'])
+            self.led.setLED('off')
             time.sleep(2.0)
             print('Not yet joined...')
         # display that the module has joined the network
         print('Joined!')
-        pycom.rgbled(LEDColors.color['blue'])
+        self.led.setLED('blue')
         time.sleep(1)
-        pycom.rgbled(LEDColors.color['off'])
+        self.led.setLED('off')
         return self.lora
 
     def sendData(self, data):
@@ -44,9 +45,9 @@ class LoRaConnection:
         # make the socket blocking
         # (waits for the data to be sent and for the 2 receive windows to expire)
         s.setblocking(True)
-        pycom.rgbled(LEDColors.color['blue'])
+        self.led.setLED('blue')
         s.send(data)
-        pycom.rgbled(LEDColors.color['off'])
+        self.led.setLED('off')
         # make the socket non-blocking
         # (because if there's no data received it will block forever...)
         s.setblocking(False)

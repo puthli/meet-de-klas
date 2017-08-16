@@ -9,19 +9,22 @@ import time
 
 
 class CoZIR:
-    uart = UART(1, baudrate=9600)
     # this uses the UART_1 default pins for TXD and RXD (``P3`` and ``P4``)
     # this equals G11 and G24 on the Pycom extension board
+    # the UART definition is made for each writeCommand to eliminate conflicts
+    # with other UART devices (e.g. pycom deep sleep shield)
 
     def writeCommand(self, command):
         output = command + '\r\n'
-        self.uart.write(output)
+        uart = UART(1, baudrate=9600)
+        uart.write(output)
         #wait max 3(s) for output from the sensor
         waitcounter = 0
-        while (waitcounter < 5 and not self.uart.any()):
+        while (waitcounter < 5 and not uart.any()):
             time.sleep(0.5)
             waitcounter += 1
-        response = self.uart.readall()
+        response = uart.readall()
+        uart.deinit()
         print(response)
         return(response)
 
@@ -52,6 +55,12 @@ class CoZIR:
     def setModeLowPower(self):
         self.writeCommand('K 0')
 
-    #calibrates the CO2 sensor to 400 ppm.
+    # calibrates the CO2 sensor to 400 ppm.
     def calibrateCO2(self):
         self.writeCommand('G')
+
+    # set digitalFilter for CO2 smoothing.
+    # Filter setting 4 Requires 5(s) warmup in addition to 1.2(s)
+    # for the power cycle.
+    def setDigitalFilter(self):
+        self.writeCommand('A 4')
