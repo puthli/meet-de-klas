@@ -17,6 +17,10 @@ import CoZIR
 import LEDColors
 import DeepSleep
 from network import WLAN
+import gc
+
+print('Meet de Klas version 0.08.01')
+gc.enable()
 
 # stop the blue light from flickering
 pycom.heartbeat(False)
@@ -46,7 +50,7 @@ else:
 
 ############################################################################
 #main execution loop, triggered by awakening from deep sleep
-minutes = 15 # number of minutes to wait between polling the sensor and sending
+minutes = 1 # number of minutes to wait between polling the sensor and sending
 led.setLED('green')
 coZIR.setModePolling()
 print("Let sensor warm up...")
@@ -66,6 +70,6 @@ for i in dataline:
         print("Non number in data - sensor is producing gibberish")
 connection.sendData(data)
 connection.lora.nvram_save()
-
 sleep = DeepSleep.DeepSleep()
+gc.collect()
 sleep.go_to_sleep(60*minutes)
