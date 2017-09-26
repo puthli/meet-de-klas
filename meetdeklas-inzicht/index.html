@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+</head>
+
+<meta charset="utf-8">
+<meta http-equiv="refresh" content="120" />
+<style type="text/css">
+
+svg {
+  font-family: "Helvetica Neue", Helvetica;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 3px;
+}
+
+.graph {
+}
+
+h1 {
+  text-align: center;
+  text-transform: lowercase;
+}
+
+</style>
+<body onload="updateText()" onresize="window.location=window.location;" >
+  <div id="loader" style="position: fixed; left: 50%; top: 50%;">
+    <img src="./ajax-loader.gif"></img>
+  </div>
+
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script>
+
+    // set the dimensions and margins of the graph
+    var margin = {top: 20, right: 50, bottom: 30, left: 50},
+        width = window.innerWidth - margin.left - margin.right,
+        height = 300 - margin.top - margin.bottom;
+
+    // set the ranges
+    var x = d3.scaleTime().range([0, width]);
+    var y = d3.scaleLinear().range([height, 0]);
+
+
+    function draw(data, domElement) {
+
+      // define the line
+      var valueline = d3.line()
+          .x(function(d) {
+             return x(d.recvTime);
+           })
+          .y(function(d) {
+            return y(d.attrValue);
+          });
+
+      // Create the area object
+      var area = d3.area()
+          .x(function(d) { return x(d.recvTime); })
+          .y1(function(d) { return y(d.attrValue); });
+
+      // Invert the area so it colors down instead of up
+      area.y0(y(0));
+
+      // append the svg object to the domElement
+      // appends a 'group' element to 'svg'
+      // moves the 'group' element to the top left margin
+      var svg = d3.select(domElement).append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+          .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
+
+      // Scale the range of the data
+      x.domain(d3.extent(data, function(d) {
+        return d.recvTime; }));
+      y.domain([0, d3.max(data, function(d) {
+    	  return d.attrValue; })]);
+
+
+      // Add the area chart
+
+      path = svg.append("path")
+            .datum(data)
+            .attr("fill", "white")
+            .attr("d", area);
+
+      path.transition()
+            .style("fill", "#E7F5FE")
+            .duration(1000);
+
+      // Add the line path.
+      svg.append("path")
+          .data([data])
+          .attr("class", "line")
+          .attr("d", valueline);
+
+      // Add the X Axis
+      svg.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(x));
+
+      // Add the Y Axis
+      svg.append("g")
+          .call(d3.axisLeft(y));
+
+
+    }
+
+    function processData(data, domElement){
+      // strip off the outer elements to get at the data
+      data = data.contextResponses[0].contextElement.attributes[0].values
+      // format the dates
+      data.forEach(function(d) {
+          var dateTime = new Date(d.recvTime);
+          d.recvTime = Date.parse(dateTime);
+      });
+      console.debug(JSON.stringify(data));
+      draw(data, domElement);
+
+      // remove loader image
+      loader = document.getElementById("loader");
+      loader.style.display = "none";
+    }
+
+    function processCo2(httpcall){
+      processData(JSON.parse(httpcall.response), "#graph1");
+    }
+
+    function processHumidity(httpcall){
+      processData(JSON.parse(httpcall.response), "#graph2");
+    }
+
+    function processTemperature(httpcall){
+      processData(JSON.parse(httpcall.response), "#graph3");
+    }
+
+
+    function getQueryVariable(variable)
+    {
+           var query = window.location.search.substring(1);
+           var vars = query.split("&");
+           for (var i=0;i<vars.length;i++) {
+                   var pair = vars[i].split("=");
+                   if(pair[0] == variable){return pair[1];}
+           }
+           return(false);
+    }
+
+    sensor = getQueryVariable("sensor");
+    days = getQueryVariable("days");
+    if (days == false) {
+      // sensible default
+      days = 7;
+    }
+
+    function updateText(){
+      sensorName = document.getElementById("sensorName").firstChild;
+      if (sensor == null) {
+        sensorName.nodeValue = "No sensor selected";
+      }
+      else{
+        sensorName.nodeValue = sensor;
+      }
+      historyParameter = document.getElementById("days").firstChild;
+
+      historyParameter.nodeValue = days;
+    }
+
+    function performRequest(url, callback){
+      let request = d3.request(url);
+      request.header("Fiware-Service", "meetdeklas");
+      request.header("Fiware-Servicepath", "/");
+      request.header("Content-Type", "application/json");
+      request.get(callback);
+    }
+
+    baseurl = "https://api.meetdeklas.nl/comet/STH/v1/contextEntities/type/MeetDeKlasSensor/id/";
+    url = baseurl + sensor + "/attributes/";
+
+    date = new Date();
+    dateTo = date.toISOString().split('T')[0];
+    date = new Date(date.setDate(date.getDate() - days));
+    dateFrom = date.toISOString().split('T')[0];
+
+    console.log(dateFrom);
+
+    co2url = url + "co2?lastN=1000"+"&dateFrom="+dateFrom
+    +"T00:00:00.000Z&dateTo="+dateTo+"T23:59:59.999Z";
+    humidityurl = url + "humidity?lastN=1000"+"&dateFrom="+dateFrom
+    +"T00:00:00.000Z&dateTo="+dateTo+"T23:59:59.999Z";
+    temperatureurl = url + "temperature?lastN=1000"+"&dateFrom="+dateFrom
+    +"T00:00:00.000Z&dateTo="+dateTo+"T23:59:59.999Z";
+
+
+    performRequest(co2url, processCo2)
+    performRequest(humidityurl, processHumidity)
+    performRequest(temperatureurl, processTemperature)
+
+  </script>
+
+
+  <H1>Sensor:
+    <span id="sensorName">Unknown</span>
+    , graph data:
+    <span id="days">Unknown</span> days
+  </H1>
+
+
+  <div id="graph1" class="graph">
+    <h2>CO2</h2>
+  </div>
+
+  <div id="graph2" class="graph">
+    <h2>Luchtvochtigheid</h2>
+  </div>
+
+  <div id="graph3" class="graph">
+    <h2>Temperatuur</h2>
+  </div>
+
+</div>
+</body>

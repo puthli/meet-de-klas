@@ -7,3 +7,5 @@ To use this code you need:
 Update the LoPy firmware before you start (consult pycom.io for the latest updater program)
 
 The hardware setup to connect the CO2 sensor is in ../hardware
+
+Code to use an alternative, cheaper DHT11 sensor is in the instruction folder.

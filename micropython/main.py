@@ -50,7 +50,7 @@ else:
 
 ############################################################################
 #main execution loop, triggered by awakening from deep sleep
-minutes = 1 # number of minutes to wait between polling the sensor and sending
+minutes = 15 # number of minutes to wait between polling the sensor and sending
 led.setLED('green')
 coZIR.setModePolling()
 print("Let sensor warm up...")
