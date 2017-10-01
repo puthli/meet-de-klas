@@ -32,7 +32,7 @@ print('Starting up...')
 #setup LoRa connection
 connection = TTN.LoRaConnection()
 print("LoRa device EUI:")
-print(connection.getDeviceEUI())
+connection.getDeviceEUI()
 connection.start()
 
 # setup sensor

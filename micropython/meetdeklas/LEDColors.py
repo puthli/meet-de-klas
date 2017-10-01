@@ -8,5 +8,5 @@ class pyLED:
     debug = False
 
     def setLED(self, value):
-        if (not self.debug):
+        if (self.debug):
             pycom.rgbled(self.color[value])

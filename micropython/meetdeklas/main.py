@@ -42,6 +42,8 @@ if (sleep.get_wake_status()["wake"] >> 5 == 1): # if power on bit set
     coZIR.setDigitalFilter()
 
     #setup LoRa connection
+    print("Device EUI:")
+    connection.getDeviceEUI()
     connection.start()
     connection.lora.nvram_save()
 else:
