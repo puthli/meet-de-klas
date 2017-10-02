@@ -19,7 +19,7 @@ import DeepSleep
 from network import WLAN
 import gc
 
-print('Meet de Klas version 0.08.01')
+print('Meet de Klas version 0.09.01')
 gc.enable()
 
 # stop the blue light from flickering
@@ -37,8 +37,12 @@ if (sleep.get_wake_status()["wake"] >> 5 == 1): # if power on bit set
     print('Starting up...')
     ############################################################################
     # setup sensor
-    coZIR.setModeLowPower()
+    coZIR.setModePolling()
+    print("Let sensor warm up...")
+    time.sleep(7) #let sensor warmup cyle finish
     coZIR.calibrateCO2()
+    time.sleep(2) #let calibration finish
+    coZIR.setModeLowPower()
     coZIR.setDigitalFilter()
 
     #setup LoRa connection
