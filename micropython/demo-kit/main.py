@@ -47,9 +47,6 @@ while True:
     co2 = "00000" # no CO2 sensor in DHT11
     hum = "{0:0>2}0".format(result.humidity)
     temp = "{0:0>2}0".format(result.temperature)
-    # release memory
-    del(result)
-    del(th)
 
     dataline = co2+hum+temp
     led.setLED('off')
@@ -61,5 +58,9 @@ while True:
         except ValueError:
             print("Non number in data - sensor is producing gibberish")
     connection.sendData(data)
+
+    # release memory
+    del(result)
+    del(th)
     gc.collect()
     time.sleep(20)
