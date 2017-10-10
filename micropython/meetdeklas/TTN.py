@@ -1,6 +1,6 @@
 #   Class TTNConnection
 #   Wrapper for LoRaWan communication with The Things Network
-#   Version 1.0
+#   Version 1.0.1
 #   Author R. Puthli, Itude Mobile
 #
 #
@@ -41,7 +41,7 @@ class LoRaConnection:
 
     def sendData(self, data):
         s = socket.socket(socket.AF_LORA, socket.SOCK_RAW) # create a LoRa socket
-        s.setsockopt(socket.SOL_LORA, socket.SO_DR, 5) # set the LoRaWAN data rate
+        s.setsockopt(socket.SOL_LORA, socket.SO_DR, 1) # set the LoRaWAN data rate
         # make the socket blocking
         # (waits for the data to be sent and for the 2 receive windows to expire)
         s.setblocking(True)
