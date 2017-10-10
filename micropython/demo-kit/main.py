@@ -2,7 +2,8 @@
 #
 #   main.py
 #   Reads sensor values and sends them to a server through LoRa
-#   Requires LoPy with CoZIR CO2, Temperature and Humidity sensor attached
+#   Requires LoPy with DHT11 Temperature and Humidity sensor attached
+#   The data pin is set to G7 (expansion board numbering)
 #   Version 1.0
 #   Author R. Puthli, Itude Mobile
 #
