@@ -1,3 +1,4 @@
+#!/usr/bin/python
 #   Class TTNConnection
 #   Wrapper for LoRaWan communication with The Things Network
 #   Version 1.0
