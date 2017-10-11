@@ -19,8 +19,8 @@ import DeepSleep
 from network import WLAN
 import gc
 
-normalSleepTime = 5 # in minutes
-panicSleepTime = 1 # in minutes
+normalSleepTime = 30 # in minutes
+panicSleepTime = 5 # in minutes
 co2PanicLevel = 1000 # ppm level above which is unhealthy
 highTempPanicLevel = 260 # degrees centigrade above which is unhealthy (includes a decimal)
 lowTempPanicLevel = 150 # degrees centigrade below which is unhealthy (includes a decimal)
