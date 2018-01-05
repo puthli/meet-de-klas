@@ -1,22 +1,23 @@
 #   Class CoZIR
 #   Wrapper for serial communication with CoZIR CO2, Temperature and Humidity sensor
-#   Version 1.0
+#   Version 1.0.1
 #   Author R. Puthli, Itude Mobile
 #
 #
 from machine import UART
+from machine import Pin
 import time
 
 
 class CoZIR:
-    # this uses the UART_1 default pins for TXD and RXD (``P3`` and ``P4``)
-    # this equals G11 and G24 on the Pycom extension board
+    # this uses the UART_1 with pins that do not conflict with the SD card
+    # this equals G9 and G8 on the Pycom extension board
     # the UART definition is made for each writeCommand to eliminate conflicts
     # with other UART devices (e.g. pycom deep sleep shield)
 
     def writeCommand(self, command):
         output = command + '\r\n'
-        uart = UART(1, baudrate=9600)
+        uart = UART(1, baudrate=9600, pins=(Pin.exp_board.G9, Pin.exp_board.G8))
         uart.write(output)
         #wait max 3(s) for output from the sensor
         waitcounter = 0

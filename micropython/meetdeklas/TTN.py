@@ -11,7 +11,7 @@ import time
 import binascii
 import pycom
 import LEDColors
-
+import SDCardUtils
 
 class LoRaConnection:
     # Initialize LoRa in LORAWAN mode.
@@ -19,6 +19,8 @@ class LoRaConnection:
     led = LEDColors.pyLED()
 
     def start(self):
+        sd = SDCardUtils.SDLogger()
+
         # create an OTAA authentication parameters, do NOT change these
         app_eui = binascii.unhexlify('70B3D57EF00068A4'.replace(' ', ''))
         app_key = binascii.unhexlify('F132D8E3289C14386E78C6253B16F641'.replace(' ', ''))
@@ -32,9 +34,9 @@ class LoRaConnection:
             time.sleep(0.5)
             self.led.setLED('off')
             time.sleep(2.0)
-            print('Not yet joined...')
+            sd.logInfo('Not yet joined...')
         # display that the module has joined the network
-        print('Joined!')
+        sd.logInfo('Joined!')
         self.led.setLED('blue')
         time.sleep(1)
         self.led.setLED('off')
@@ -59,4 +61,4 @@ class LoRaConnection:
 
     # needed to fill in the TTN console
     def getDeviceEUI(self):
-        print(binascii.hexlify(self.lora.mac()).upper().decode('utf-8'))
+        return binascii.hexlify(self.lora.mac()).upper().decode('utf-8')
