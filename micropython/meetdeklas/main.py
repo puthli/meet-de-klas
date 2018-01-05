@@ -74,6 +74,7 @@ temp = coZIR.getTemperature()
 sd.append('%s.csv' % connection.lora.mac(), '%s, %s, %s, %s' % (time.time(), co2, temp, hum))
 #   create data for LoRa Message
 dataline = co2+hum+temp
+sd.setProperty('lastSensorValues', dataline)
 led.setLED('off')
 coZIR.setModeLowPower()
 sd.logInfo(dataline)
@@ -83,8 +84,8 @@ for i in dataline:
         data.append(int(chr(i))) # convert ascii characters to bytes
     except ValueError:
         sd.logInfo("Non number in data - sensor is producing gibberish")
-connection.sendData(data)
-connection.lora.nvram_save()
+        connection.sendData(data)
+        connection.lora.nvram_save()
 
 sleep = DeepSleep.DeepSleep()
 if (int(co2) > co2PanicLevel or int(temp) > highTempPanicLevel or int(temp) < lowTempPanicLevel):
