@@ -3,7 +3,7 @@
 #   main.py
 #   Reads sensor values and sends them to a server through LoRa
 #   Requires LoPy with CoZIR CO2, Temperature and Humidity sensor attached
-#   Version 1.0
+#   Version 0.10.01
 #   Author R. Puthli, Itude Mobile
 #
 #
@@ -19,7 +19,13 @@ import DeepSleep
 from network import WLAN
 import gc
 
-print('Meet de Klas version 0.09.01')
+normalSleepTime = 30 # in minutes
+panicSleepTime = 5 # in minutes
+co2PanicLevel = 1000 # ppm level above which is unhealthy
+highTempPanicLevel = 260 # degrees centigrade above which is unhealthy (includes a decimal)
+lowTempPanicLevel = 150 # degrees centigrade below which is unhealthy (includes a decimal)
+sensorWarmupInterval = 7 # seconds required for the CO2 sensor to warm up
+print('Meet de Klas version 0.10.01')
 gc.enable()
 
 # stop the blue light from flickering
@@ -39,7 +45,7 @@ if (sleep.get_wake_status()["wake"] >> 5 == 1): # if power on bit set
     # setup sensor
     coZIR.setModePolling()
     print("Let sensor warm up...")
-    time.sleep(7) #let sensor warmup cyle finish
+    time.sleep(sensorWarmupInterval) #let sensor warmup cyle finish
     coZIR.calibrateCO2()
     time.sleep(2) #let calibration finish
     coZIR.setModeLowPower()
@@ -56,11 +62,11 @@ else:
 
 ############################################################################
 #main execution loop, triggered by awakening from deep sleep
-minutes = 15 # number of minutes to wait between polling the sensor and sending
+minutes = normalSleepTime # number of minutes to wait between polling the sensor and sending
 led.setLED('green')
 coZIR.setModePolling()
 print("Let sensor warm up...")
-time.sleep(7) #let sensor warmup cyle finish
+time.sleep(sensorWarmupInterval) #let sensor warmup cyle finish
 co2 = coZIR.getCO2()
 hum = coZIR.getHumidity()
 temp = coZIR.getTemperature()
@@ -76,6 +82,15 @@ for i in dataline:
         print("Non number in data - sensor is producing gibberish")
 connection.sendData(data)
 connection.lora.nvram_save()
+
 sleep = DeepSleep.DeepSleep()
+if (int(co2) > co2PanicLevel or int(temp) > highTempPanicLevel or int(temp) < lowTempPanicLevel):
+    # start blurting out signals at a higher rate
+    print("Panic mode, setting shorter sleep interval: %d minutes" % panicSleepTime)
+    minutes = panicSleepTime
+else:
+    print("Normal mode, setting sleep interval: %d minutes" % normalSleepTime)
+    minutes = normalSleepTime
+
 gc.collect()
 sleep.go_to_sleep(60*minutes)
