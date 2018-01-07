@@ -44,20 +44,27 @@ class LoRaConnection:
 
     def sendData(self, data):
         s = socket.socket(socket.AF_LORA, socket.SOCK_RAW) # create a LoRa socket
-        s.setsockopt(socket.SOL_LORA, socket.SO_DR, 1) # set the LoRaWAN data rate
+        s.setsockopt(socket.SOL_LORA, socket.SO_DR, 3) # set the LoRaWAN data rate
+        # s.setsockopt(socket.SOL_LORA, socket.SO_CONFIRMED, True) # use confirmed message
         # make the socket blocking
         # (waits for the data to be sent and for the 2 receive windows to expire)
         s.setblocking(True)
-        self.led.setLED('blue')
-        s.send(data)
-        self.led.setLED('off')
-        # make the socket non-blocking
-        # (because if there's no data received it will block forever...)
-        s.setblocking(False)
-        # get any data received and print if there is any
-        data = s.recv(64)
-        if len(data) > 0:
-            print(data)
+        try:
+            self.led.setLED('blue')
+            s.send(data)
+            self.led.setLED('off')
+            # make the socket non-blocking
+            # (because if there's no data received it will block forever...)
+            s.setblocking(False)
+            s.settimeout(3.0)
+            # configure a timeout value of 3 seconds
+            # get any data received and print if there is any
+            data = s.recv(64)
+            if len(data) > 0:
+                print(data)
+        except OSError as e:
+            sd = SDCardUtils.SDLogger()
+            sd.logInfo(e)
 
     # needed to fill in the TTN console
     def getDeviceEUI(self):

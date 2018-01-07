@@ -3,7 +3,7 @@
 #   main.py
 #   Reads sensor values and sends them to a server through LoRa
 #   Requires LoPy with CoZIR CO2, Temperature and Humidity sensor attached
-#   Version 0.10.01
+#   Version 0.10.02
 #   Author R. Puthli, Itude Mobile
 #
 #
@@ -84,8 +84,9 @@ for i in dataline:
         data.append(int(chr(i))) # convert ascii characters to bytes
     except ValueError:
         sd.logInfo("Non number in data - sensor is producing gibberish")
-        connection.sendData(data)
-        connection.lora.nvram_save()
+
+connection.sendData(data)
+connection.lora.nvram_save()
 
 sleep = DeepSleep.DeepSleep()
 if (int(co2) > co2PanicLevel or int(temp) > highTempPanicLevel or int(temp) < lowTempPanicLevel):
@@ -97,5 +98,5 @@ else:
     minutes = normalSleepTime
 
 gc.collect()
-sleep.go_to_sleep(20)
-# sleep.go_to_sleep(60*minutes)
+sleep.go_to_sleep(50)
+#  sleep.go_to_sleep(60*minutes)
