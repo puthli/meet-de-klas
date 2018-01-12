@@ -26,7 +26,7 @@ class SDLogger:
                 with open('/sd/property_%s' % key, 'r') as file:
                     result = file.read()
             except OSError as e:
-                print(e)
+                sys.print_exception(e)
         except OSError:
             print('SD card cannot be written to')
         return result
@@ -46,7 +46,7 @@ class SDLogger:
                 with open('/sd/property_%s' % key, 'w') as file:
                     file.write('%s' % value)
             except OSError as e:
-                print(e)
+                sys.print_exception(e)
         except OSError:
             print('SD card cannot be written to')
 
