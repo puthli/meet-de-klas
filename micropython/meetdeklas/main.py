@@ -12,10 +12,9 @@ import time
 import pycom
 import CoZIR
 import LEDColors
-import DeepSleep
 from network import WLAN
-import gc
 import SDCardUtils
+import machine
 
 sd = SDCardUtils.SDLogger()
 
@@ -26,7 +25,6 @@ highTempPanicLevel = 260 # degrees centigrade above which is unhealthy (includes
 lowTempPanicLevel = 150 # degrees centigrade below which is unhealthy (includes a decimal)
 sensorWarmupInterval = 7 # seconds required for the CO2 sensor to warm up
 sd.logInfo('Meet de Klas version 0.10.02')
-gc.enable()
 
 # stop the blue light from flickering
 pycom.heartbeat(False)
@@ -38,9 +36,8 @@ wlan.deinit()
 
 connection = TTN.LoRaConnection()
 coZIR = CoZIR.CoZIR()
-sleep = DeepSleep.DeepSleep()
-sd.logInfo(sleep.get_wake_status())
-if (sleep.get_wake_status()["wake"] >> 5 == 1): # if power on bit set
+sd.logInfo(machine.reset_cause())
+if (machine.reset_cause() != machine.DEEPSLEEP_RESET): # if power on bit set
     sd.logInfo('Starting up...')
     ############################################################################
     # setup sensor
@@ -97,6 +94,5 @@ else:
     sd.logInfo("Normal mode, setting sleep interval: %d minutes" % normalSleepTime)
     minutes = normalSleepTime
 
-gc.collect()
-sleep.go_to_sleep(50)
-#  sleep.go_to_sleep(60*minutes)
+machine.deepsleep(20*1000) # milliseconds
+#  machine.deepsleep(1000*60*minutes)

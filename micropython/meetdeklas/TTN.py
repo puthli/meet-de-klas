@@ -26,7 +26,7 @@ class LoRaConnection:
         app_key = binascii.unhexlify('F132D8E3289C14386E78C6253B16F641'.replace(' ', ''))
 
         # join a network using OTAA (Over the Air Activation)
-        self.lora.join(activation=LoRa.OTAA, auth=(app_eui, app_key), timeout=0, dr=1)
+        self.lora.join(activation=LoRa.OTAA, auth=(app_eui, app_key), timeout=0)
         self.led.setLED('pink')
         # wait until the module has joined the network
         while not self.lora.has_joined():
