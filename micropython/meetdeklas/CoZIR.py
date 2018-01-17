@@ -1,19 +1,22 @@
 #   Class CoZIR
 #   Wrapper for serial communication with CoZIR CO2, Temperature and Humidity sensor
-#   Version 1.0.1
+#   Version 1.0
 #   Author R. Puthli, Itude Mobile
 #
 #
 from machine import UART
 from machine import Pin
 import time
+from AirSensor import AirSensor
 
 
-class CoZIR:
+class CoZIR(AirSensor):
     # this uses the UART_1 with pins that do not conflict with the SD card
     # this equals G9 and G8 on the Pycom extension board
     # the UART definition is made for each writeCommand to eliminate conflicts
     # with other UART devices (e.g. pycom deep sleep shield)
+
+    sensorWarmupInterval = 11 # seconds required for the CO2 sensor to warm up
 
     def writeCommand(self, command):
         output = command + '\r\n'
@@ -50,10 +53,11 @@ class CoZIR:
             temperature = rawTemperature[5:8]
             return temperature
 
-    def setModePolling(self):
+    def turnOn(self):
         self.writeCommand('K 2')
+        time.sleep(self.sensorWarmupInterval) #let sensor warmup cyle finish
 
-    def setModeLowPower(self):
+    def turnOff(self):
         self.writeCommand('K 0')
 
     # calibrates the CO2 sensor to 400 ppm.
@@ -61,7 +65,10 @@ class CoZIR:
         self.writeCommand('G')
 
     # set digitalFilter for CO2 smoothing.
-    # Filter setting 4 Requires 5(s) warmup in addition to 1.2(s)
+    # Filter setting 8 Requires 9(s) warmup in addition to 1.2(s)
     # for the power cycle.
     def setDigitalFilter(self):
-        self.writeCommand('A 4')
+        self.writeCommand('A 8')
+
+    def setup(self):
+        self.setDigitalFilter()

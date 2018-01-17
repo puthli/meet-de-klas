@@ -6,6 +6,7 @@ from machine import SD
 from machine import RTC
 import os
 import time
+import sys
 
 
 class SDLogger:
@@ -28,7 +29,7 @@ class SDLogger:
             except OSError as e:
                 sys.print_exception(e)
         except OSError:
-            print('SD card cannot be written to')
+            print('SD card cannot be read from')
         return result
 
     # store a key, value pair
@@ -43,7 +44,7 @@ class SDLogger:
                 # SD card already mounted
 
             try:
-                with open('/sd/property_%s' % key, 'w') as file:
+                with open('/sd/property_%s' % key, 'w+') as file:
                     file.write('%s' % value)
             except OSError as e:
                 sys.print_exception(e)
@@ -62,7 +63,7 @@ class SDLogger:
                 # SD card already mounted
 
             try:
-                with open('/sd/%s' % filename, 'a') as file:
+                with open('/sd/%s' % filename, 'a+  ') as file:
                     file.write('%s\n' % line)
             except OSError as e:
                 print(e)
