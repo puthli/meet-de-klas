@@ -54,6 +54,7 @@ class CoZIR(AirSensor):
             return temperature
 
     def turnOn(self):
+        self.writeCommand('K 0')
         self.writeCommand('K 2')
         time.sleep(self.sensorWarmupInterval) #let sensor warmup cyle finish
 

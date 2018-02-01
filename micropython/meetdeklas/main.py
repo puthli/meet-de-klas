@@ -19,12 +19,13 @@ import machine
 
 sd = SDLogger()
 
-normalSleepTime = 10 # in minutes
-panicSleepTime = 10 # in minutes
+SENSORERRORCODE = b'99'
+normalSleepTime = 15 # in minutes
+panicSleepTime = 15 # in minutes
 co2PanicLevel = 1000 # ppm level above which is unhealthy
 highTempPanicLevel = 260 # degrees centigrade above which is unhealthy (includes a decimal)
 lowTempPanicLevel = 150 # degrees centigrade below which is unhealthy (includes a decimal)
-sd.logInfo('Meet de Klas version 0.10.04')
+sd.logInfo('Okku version 0.11.01')
 
 # stop the blue light from flickering
 pycom.heartbeat(False)
@@ -35,8 +36,8 @@ wlan.deinit()
 
 
 connection = TTN.LoRaConnection()
-#airSensor = CoZIR()
-airSensor = AirSensor()
+#airSensor = AirSensor()
+airSensor = CoZIR()
 sd.logInfo(machine.reset_cause())
 if (machine.reset_cause() != machine.DEEPSLEEP_RESET): # if power on bit set
     sd.logInfo('Starting up...')
@@ -62,14 +63,25 @@ airSensor.turnOn()
 co2 = airSensor.getCO2()
 hum = airSensor.getHumidity()
 temp = airSensor.getTemperature()
+airSensor.turnOff()
 
 #   write to SD card in format (LoRa EUI, time(s), dataline)
 sd.append('%s.csv' % connection.lora.mac(), '%s, %s, %s, %s' % (time.time(), co2, temp, hum))
 #   create data for LoRa Message
-dataline = co2+hum+temp
+try:
+    dataline = co2+hum+temp
+    if (int(co2) > co2PanicLevel or int(temp) > highTempPanicLevel or int(temp) < lowTempPanicLevel):
+        # start blurting out signals at a higher rate
+        sd.logInfo("Panic mode, setting shorter sleep interval: %d minutes" % panicSleepTime)
+        minutes = panicSleepTime
+    else:
+        sd.logInfo("Normal mode, setting sleep interval: %d minutes" % normalSleepTime)
+        minutes = normalSleepTime
+except TypeError:
+    dataline = SENSORERRORCODE
+
 sd.setProperty('lastSensorValues', dataline)
 led.setLED('off')
-airSensor.turnOff()
 sd.logInfo(dataline)
 data = bytearray()
 for i in dataline:
@@ -81,13 +93,5 @@ for i in dataline:
 connection.sendData(data)
 connection.lora.nvram_save()
 
-if (int(co2) > co2PanicLevel or int(temp) > highTempPanicLevel or int(temp) < lowTempPanicLevel):
-    # start blurting out signals at a higher rate
-    sd.logInfo("Panic mode, setting shorter sleep interval: %d minutes" % panicSleepTime)
-    minutes = panicSleepTime
-else:
-    sd.logInfo("Normal mode, setting sleep interval: %d minutes" % normalSleepTime)
-    minutes = normalSleepTime
-
-machine.deepsleep(20*1000) # milliseconds
-#  machine.deepsleep(1000*60*minutes)
+# machine.deepsleep(20*1000) # milliseconds
+machine.deepsleep(1000*60*minutes)
