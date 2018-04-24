@@ -65,6 +65,10 @@ class CoZIR(AirSensor):
     def calibrateCO2(self):
         self.writeCommand('G')
 
+    # set autocalibration to once every 12 days (assuming a 20 minute interval between measurements)
+    def setAutoCalibrateIntervalCO2(self):
+        self.writeCommand('@ 0.1 0.1')
+
     # set digitalFilter for CO2 smoothing.
     # Filter setting 8 Requires 9(s) warmup in addition to 1.2(s)
     # for the power cycle.
@@ -73,3 +77,4 @@ class CoZIR(AirSensor):
 
     def setup(self):
         self.setDigitalFilter()
+        self.setAutoCalibrateIntervalCO2()

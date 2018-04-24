@@ -21,3 +21,6 @@ class AirSensor():
 
     def getCO2(self):
         return b'00450'
+
+    def calibrateCO2(self):
+        pass

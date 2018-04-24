@@ -1,4 +1,4 @@
-#LED colors
+# LED colors
 
 import pycom
 

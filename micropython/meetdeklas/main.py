@@ -1,9 +1,9 @@
-#!/usr/bin/python
+# !/usr/bin/python
 #
 #   main.py
 #   Reads sensor values and sends them to a server through LoRa
 #   Requires LoPy with CoZIR CO2, Temperature and Humidity sensor attached
-#   Version 0.10.02
+#   Version 0.11.02
 #   Author R. Puthli, Itude Mobile
 #
 #
@@ -25,7 +25,7 @@ panicSleepTime = 15 # in minutes
 co2PanicLevel = 1000 # ppm level above which is unhealthy
 highTempPanicLevel = 260 # degrees centigrade above which is unhealthy (includes a decimal)
 lowTempPanicLevel = 150 # degrees centigrade below which is unhealthy (includes a decimal)
-sd.logInfo('Okku version 0.11.01')
+sd.logInfo('Okku version 0.11.02')
 
 # stop the blue light from flickering
 pycom.heartbeat(False)
@@ -45,6 +45,11 @@ if (machine.reset_cause() != machine.DEEPSLEEP_RESET): # if power on bit set
     # setup sensor
     airSensor.turnOff()
     airSensor.setup()
+
+    # calibrate CO2
+    sd.logInfo('Calibrating CO2...')
+    airSensor.turnOn()
+    airSensor.calibrateCO2()
 
     #setup LoRa connection
     sd.logInfo("Device EUI: %s" % connection.getDeviceEUI())
